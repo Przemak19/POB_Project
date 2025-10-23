@@ -1,21 +1,29 @@
 package pob.pob_project.gui;
 
-import pob.pob_project.crc.CRCUtil;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import pob.pob_project.simulation.SimulationController;
 
-import java.util.zip.CRC32;
+public class MainApp extends Application {
 
-public class MainApp {
+    SimulationController controller;
+
+    @Override
+    public void start(Stage stage) {
+        controller = new SimulationController();
+        controller.initializeNetwork();
+        controller.startSimulation();
+
+        MainWindow window = new MainWindow(controller);
+        Scene scene = new Scene(window, 1000, 1000);
+
+        stage.setTitle("Symulacja");
+        stage.setScene(scene);
+        stage.show();
+    }
 
     public static void main(String[] args) {
-
-        System.out.println("Hello World");
-
-        String message = "Hello World";
-        String poly = "10101";
-
-        CRCUtil crcUtil = new CRCUtil();
-
-        System.out.println(crcUtil.appendCRC(message, poly));
-
+        launch();
     }
 }
