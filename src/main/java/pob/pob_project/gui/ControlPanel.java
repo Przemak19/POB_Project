@@ -5,6 +5,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import pob.pob_project.error.ErrorType;
 import pob.pob_project.network.Node;
+import pob.pob_project.simulation.Logger;
 import pob.pob_project.simulation.SimulationController;
 
 public class ControlPanel extends VBox {
@@ -89,6 +90,7 @@ public class ControlPanel extends VBox {
         Button crcApply = new Button("Zmień wielomian");
 
         crcApply.setOnAction(e -> {
+
             if(controller.checkCrcPolynomial(crcField.getText().trim())) {
                 controller.setCrcPolynomial(crcField.getText().trim());
             } else {

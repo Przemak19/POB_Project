@@ -91,10 +91,12 @@ public class Node implements Runnable {
         }
 
         if(packet.isDelayed()) {
-            int delay = new Random().nextInt(1000) + 2000;
+            int delay = new Random().nextInt(800);
             Logger.log("Opóźnienie jest równe " + delay + " ms.");
             Thread.sleep(delay);
         }
+
+        Thread.sleep(200);
 
         boolean valid = crcUtil.validateCRC(packet, polynomial);
 
