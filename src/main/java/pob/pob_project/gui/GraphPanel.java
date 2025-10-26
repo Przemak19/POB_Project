@@ -68,12 +68,12 @@ public class GraphPanel extends Pane {
     }
 
     /** Animacja przesyłu danych między dwoma węzłami. */
-    public void animateTransmission(Node from, Node to, boolean success) {
+    public void animateTransmission(Node from, Node to) {
         Circle c1 = nodeCircles.get(from);
         Circle c2 = nodeCircles.get(to);
         if (c1 == null || c2 == null) return;
 
-        Circle packet = new Circle(5, success ? Color.LIMEGREEN : Color.RED);
+        Circle packet = new Circle(5, Color.LIMEGREEN);
         getChildren().add(packet);
 
         Path path = new Path();

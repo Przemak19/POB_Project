@@ -7,6 +7,7 @@ import pob.pob_project.simulation.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -35,13 +36,13 @@ public class Node implements Runnable {
         nodeThread.start();
     }
 
-    public boolean sendData(Node target, String message) {
+    public void sendData(Node target, String message) {
         if (!isActive) {
             Logger.log("Węzeł " + id + " jest nieaktywny – nie można wysłać danych.");
-            return false;
+            return;
         }
 
-        String data;
+        String data = "";
         try {
             if (currentFault != null && currentFault.getType() == ErrorType.CRC_FAILURE && currentFault.isActive()) {
                 data = crcUtil.appendCRC(message, ""); //generowany jest wyjatek IndexOutOfBounds
@@ -52,22 +53,20 @@ public class Node implements Runnable {
         } catch (Exception e) {
             Logger.log("Błąd przy obliczaniu CRC w węźle " + id);
             System.out.println(e.getMessage());
-            return false;
+            return;
         }
 
         Packet packet = new Packet(data, this.id, target.getId());
         Logger.log("Węzeł " + id + " wysyła pakiet z wiadomością: " + message +
                 " do węzła " + target.getId() + ": pakiet bitów zabezpieczonych CRC: " + data);
 
-        // Możliwe błędy transmisji: DELAY, PACKET_DROP
         if (currentFault != null && currentFault.isActive()) {
-            if (currentFault.getType() == ErrorType.PACKET_DROP) {
-                Logger.log("Węzeł " + id + ": pakiet został utracony. (PACKET_DROP)");
-                return false;
+            if(currentFault.getType() == ErrorType.DELAY) {
+                packet.setIsDelayed(true);
             }
-            if (currentFault.getType() == ErrorType.DELAY) {
-                    packet.setIsDelayed(true);
-                    Logger.log("Opóźnienie pakietu wysłanego z węzła " + id + ". (DELAY)");
+            else if(currentFault.getType() == ErrorType.PACKET_DROP) {
+                Logger.log("Węzeł " + id + ": pakiet został utracony. (PACKET_DROP)");
+                return;
             }
         }
 
@@ -75,9 +74,7 @@ public class Node implements Runnable {
             target.getQueue().put(packet);
         } catch (InterruptedException e) {
             Logger.log("Błąd wysyłki pakietu od węzła " + this.id);
-            return false;
         }
-        return true;
     }
 
     public void setCrcPolynomial(String poly) {
@@ -91,12 +88,17 @@ public class Node implements Runnable {
         }
 
         if(packet.isDelayed()) {
-            int delay = new Random().nextInt(800);
-            Logger.log("Opóźnienie jest równe " + delay + " ms.");
+            int delay = new Random().nextInt(800) + 200;
+            Logger.log("Opóźnienie jest równe " + delay + " ms + standardowe opóźnienie 200 ms.");
             Thread.sleep(delay);
         }
 
         Thread.sleep(200);
+
+        if (currentFault != null && Objects.requireNonNull(currentFault).isActive() && Objects.requireNonNull(currentFault).getType() == ErrorType.PACKET_DROP) {
+            Logger.log("Węzeł " + id + ": pakiet został utracony. (PACKET_DROP)");
+            return;
+        }
 
         boolean valid = crcUtil.validateCRC(packet, polynomial);
 
@@ -141,4 +143,6 @@ public class Node implements Runnable {
     public BlockingQueue<Packet> getQueue() { return incomingQueue; }
     public boolean isActive() { return isActive; }
     public List<Node> getNeighbors() { return neighbors; }
+    public Node getNeighbor(int id) { return neighbors.get(id); }
+    public Fault getCurrentFault() { return currentFault; }
 }

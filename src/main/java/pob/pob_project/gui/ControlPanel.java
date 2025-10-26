@@ -73,12 +73,13 @@ public class ControlPanel extends VBox {
 
             if(src == dst) {
                 showAlert("Błędnie wybrane węzły", "Węzeł nie może wysłać wiadomości do samego siebie.");
-            }
-            else if(!controller.checkNeighbors(src, dst)) {
+            } else if(!controller.checkNeighbors(src, dst)) {
                 showAlert("Błędnie wybrane węzły", "Wybrane węzły nie są ze sobą połączone.");
+            } else if(dataField.getText().isEmpty() || dataField.getText().isBlank()) {
+                showAlert("Brak wiadomość", "Podaj wiadomość do wysłania.");
             } else {
-                boolean success = src.sendData(dst, dataField.getText());
-                graphPanel.animateTransmission(src, dst, success);
+                src.sendData(dst, dataField.getText());
+                graphPanel.animateTransmission(src, dst);
             }
 
         });
