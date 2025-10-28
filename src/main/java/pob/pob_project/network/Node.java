@@ -56,6 +56,10 @@ public class Node implements Runnable {
             return;
         }
 
+        if (currentFault != null && currentFault.isActive() && currentFault.getType() == ErrorType.BIT_FLIP) {
+            data = flipRandomBit(data);
+        }
+
         Packet packet = new Packet(data, this.id, target.getId());
         Logger.log("Węzeł " + id + " wysyła pakiet z wiadomością: " + message +
                 " do węzła " + target.getId() + ": pakiet bitów zabezpieczonych CRC: " + data);
@@ -137,6 +141,18 @@ public class Node implements Runnable {
             isActive = true;
             currentFault = null;
         }
+    }
+
+    private String flipRandomBit(String data) {
+        if (data == null || data.isEmpty()) return data;
+
+        Random random = new Random();
+        int index = random.nextInt(data.length());
+
+        char[] bits = data.toCharArray();
+        bits[index] = (bits[index] == '0') ? '1' : '0';
+
+        return new String(bits);
     }
 
     public int getId() { return id; }
