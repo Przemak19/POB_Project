@@ -92,7 +92,7 @@ public class Node implements Runnable {
         }
 
         if(packet.isDelayed()) {
-            int delay = new Random().nextInt(800) + 200;
+            int delay = new Random().nextInt(700) + 100;
             Logger.log("Opóźnienie jest równe " + delay + " ms + standardowe opóźnienie 200 ms.");
             Thread.sleep(delay);
         }

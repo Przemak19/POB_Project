@@ -67,7 +67,16 @@ public class ControlPanel extends VBox {
         Spinner<Integer> dstSpinner = new Spinner<>(0, 9, 1);
         Button sendBtn = new Button("Wyślij");
 
+        final long[] lastSendTime = {0};
+
         sendBtn.setOnAction(e -> {
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime - lastSendTime[0] < 1000) {
+                showAlert("Blokada spamu", "Poczekaj przynajmniej 1 sekundę przed wysłaniem kolejnej wiadomości.");
+                return;
+            }
+
             Node src = controller.getGraph().getNodes().get(srcSpinner.getValue());
             Node dst = controller.getGraph().getNodes().get(dstSpinner.getValue());
 
@@ -80,6 +89,8 @@ public class ControlPanel extends VBox {
             } else {
                 src.sendData(dst, dataField.getText());
                 graphPanel.animateTransmission(src, dst);
+
+                lastSendTime[0] = currentTime;
             }
 
         });
