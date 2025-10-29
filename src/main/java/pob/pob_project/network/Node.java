@@ -34,7 +34,7 @@ public class Node implements Runnable {
     }
 
     public void start() {
-        nodeThread = new Thread(this, "Node-" + id);
+        nodeThread = new Thread(this, "Komputer-" + id);
         nodeThread.start();
     }
 
@@ -43,7 +43,7 @@ public class Node implements Runnable {
      */
     public void sendData(Node target, String message) {
         if (!isActive) {
-            Logger.log("Węzeł " + id + " jest nieaktywny – nie można wysłać danych.");
+            Logger.log("Komputer " + id + ": nieaktywny - nie można wysłać danych. (NODE_FREEZE)");
             return;
         }
 
@@ -51,12 +51,12 @@ public class Node implements Runnable {
         try {
             if (currentFault != null && currentFault.getType() == ErrorType.CRC_FAILURE && currentFault.isActive()) {
                 data = crcUtil.appendCRC(message, ""); // generuje wyjątek
-                Logger.log("Węzeł " + id + " generuje błędne CRC. (CRC_FAILURE)");
+                Logger.log("Komputer " + id + ": generuje błędne CRC. (CRC_FAILURE)");
             } else {
                 data = crcUtil.appendCRC(message, polynomial);
             }
         } catch (Exception e) {
-            Logger.log("Błąd przy obliczaniu CRC w węźle " + id + ": " + e.getMessage());
+            Logger.log("Komputer " + id + ": błąd przy obliczaniu CRC: " + e.getMessage());
             return;
         }
 
@@ -73,25 +73,25 @@ public class Node implements Runnable {
             int currentDelay = new Random().nextInt(700);
             packet.setIsDelayed(true);
             packet.setDelay(currentDelay + packet.getDelay());
-            Logger.log("Węzeł " + id + ": pakiet opóźniony o " + packet.getDelay() + " ms.");
+            Logger.log("Komputer " + id + ": pakiet opóźniony o " + packet.getDelay() + " ms.");
         }
 
         // Utrata pakietu
         if (currentFault != null && currentFault.getType() == ErrorType.PACKET_DROP) {
-            Logger.log("Węzeł " + id + ": pakiet został utracony. (PACKET_DROP)");
+            Logger.log("Komputer " + id + ": pakiet został utracony. (PACKET_DROP)");
             return;
         }
 
         // Zapisz ostatnio wysłany pakiet (do ewentualnej retransmisji)
         lastSentPackets.put(target.getId(), correctPacket);
 
-        Logger.log("Węzeł " + id + " wysyła pakiet do " + target.getId() +
-                " z wiadomością: " + message + ", dane (z CRC): " + data);
+        Logger.log("Komputer " + id + ": wysyła pakiet do komputer " + target.getId() +
+                " z wiadomością: " + message + ", dane (z CRC) [bity]: " + data + ".");
 
         try {
             target.getQueue().put(packet);
         } catch (InterruptedException e) {
-            Logger.log("Błąd wysyłki pakietu od węzła " + this.id + " do węzła " + target.getId());
+            Logger.log("Komputer " + this.id + ": błąd wysyłki pakietu do komputer " + target.getId() + ".");
         }
     }
 
@@ -100,7 +100,7 @@ public class Node implements Runnable {
      */
     public void receivePacket(Packet packet) throws InterruptedException {
         if (!isActive) {
-            Logger.log("Węzeł " + id + " nieaktywny – pakiet odrzucony.");
+            Logger.log("Komputer " + id + ": nieaktywny - pakiet odrzucony.");
             return;
         }
 
@@ -117,9 +117,9 @@ public class Node implements Runnable {
         // Obsługa ACK
         if (packet.isAck()) {
             if (packet.isAckPositive()) {
-                Logger.log("Węzeł " + id + " otrzymał potwierdzenie ACK od " + packet.getSourceId());
+                Logger.log("Komputer " + id + ": otrzymał potwierdzenie ACK od komputer " + packet.getSourceId() + ".");
             } else {
-                Logger.log("Węzeł " + id + " otrzymał NACK – retransmisja pakietu");
+                Logger.log("Komputer " + id + ": otrzymał NACK - retransmisja pakietu.");
                 Packet last = lastSentPackets.get(packet.getSourceId());
                 if (last != null) {
                     repairFault();
@@ -133,15 +133,15 @@ public class Node implements Runnable {
         boolean valid = crcUtil.validateCRC(packet, polynomial);
 
         if (valid) {
-            Logger.log("Węzeł " + id + " odebrał POPRAWNY pakiet od " + packet.getSourceId() +
-                    ": " + crcUtil.extractMessage(packet.getData(), polynomial));
+            Logger.log("Komputer " + id + ": odebrał POPRAWNY pakiet od komputer " + packet.getSourceId() +
+                    " " + crcUtil.extractMessage(packet.getData(), polynomial) + ", dane (z CRC) [bity]: " + packet.getData() + ".");
 
             // Wyślij ACK pozytywny
             Packet ack = Packet.createAckPacket(id, packet.getSourceId(), true);
             sourceNode.getQueue().put(ack);
         } else {
-            Logger.log("Węzeł " + id + " wykrył BŁĄD w pakiecie od " + packet.getSourceId() +
-                    " – CRC niepoprawne!");
+            Logger.log("Komputer " + id + ": wykrył BŁĄD w pakiecie od komputer " + packet.getSourceId() +
+                    ": " + crcUtil.extractMessage(packet.getData(),polynomial) + " - CRC niepoprawne, dane (z CRC) [bity]: " + packet.getData() + ".");
             // Wyślij ACK negatywny (żądanie retransmisji)
             Packet nack = Packet.createAckPacket(id, packet.getSourceId(), false);
             sourceNode.getQueue().put(nack);
@@ -161,8 +161,6 @@ public class Node implements Runnable {
         }
     }
 
-    // --- Pomocnicze metody ---
-
     private Node findNeighborById(int id) {
         for (Node n : neighbors) {
             if (n.getId() == id) return n;
@@ -179,16 +177,15 @@ public class Node implements Runnable {
         return new String(bits);
     }
 
-    // --- Inne istniejące metody ---
     public void injectFault(ErrorType type) {
         this.currentFault = new Fault(type);
         this.isActive = type != ErrorType.NODE_FREEZE;
-        Logger.log("Węzeł " + id + ": wstrzyknięto błąd " + type);
+        Logger.log("Komputer " + id + ": wstrzyknięto błąd " + type);
     }
 
     public void repairFault() {
         if (currentFault != null) {
-            Logger.log("Węzeł " + id + ": usterka " + currentFault.getType() + " usunięta.");
+            Logger.log("Komputer " + id + ": usterka " + currentFault.getType() + " usunięta.");
             currentFault.deactivate();
             isActive = true;
             currentFault = null;

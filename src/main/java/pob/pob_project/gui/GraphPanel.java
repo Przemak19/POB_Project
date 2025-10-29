@@ -97,17 +97,6 @@ public class GraphPanel extends Pane {
         animateTransmission(from, to, 1500);
     }
 
-    /** Miganie węzła z błędem. */
-    public void flashNode(Node node) {
-        Circle circle = nodeCircles.get(node);
-        if (circle == null) return;
-
-        FillTransition ft = new FillTransition(Duration.seconds(0.5), circle, Color.RED, Color.DARKRED);
-        ft.setAutoReverse(true);
-        ft.setCycleCount(2);
-        ft.play();
-    }
-
     public void updateNodeColor(Node node, boolean active) {
         Circle circle = nodeCircles.get(node);
         if (circle != null) {

@@ -43,7 +43,6 @@ public class ControlPanel extends VBox {
             ErrorType type = errorTypeBox.getValue();
             controller.injectError(node, type);
             graphPanel.updateNodeColor(node, false);
-            graphPanel.flashNode(node);
         });
 
         repairBtn.setOnAction(e -> {
