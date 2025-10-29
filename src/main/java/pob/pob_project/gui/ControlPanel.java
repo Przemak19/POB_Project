@@ -5,7 +5,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import pob.pob_project.error.ErrorType;
 import pob.pob_project.network.Node;
-import pob.pob_project.simulation.Logger;
 import pob.pob_project.simulation.SimulationController;
 
 public class ControlPanel extends VBox {
@@ -88,7 +87,6 @@ public class ControlPanel extends VBox {
                 showAlert("Brak wiadomość", "Podaj wiadomość do wysłania.");
             } else {
                 src.sendData(dst, dataField.getText());
-                graphPanel.animateTransmission(src, dst);
 
                 lastSendTime[0] = currentTime;
             }

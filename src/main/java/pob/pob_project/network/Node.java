@@ -4,26 +4,28 @@ import pob.pob_project.crc.CRCUtil;
 import pob.pob_project.error.ErrorType;
 import pob.pob_project.error.Fault;
 import pob.pob_project.simulation.Logger;
+import pob.pob_project.simulation.SimulationController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Node implements Runnable {
+
     private final int id;
     private boolean isActive = true;
     private final BlockingQueue<Packet> incomingQueue = new LinkedBlockingQueue<>();
     private final List<Node> neighbors = new ArrayList<>();
     private Fault currentFault;
-    private String polynomial = "1010";
+    private String polynomial;
     private final CRCUtil crcUtil;
     private Thread nodeThread;
+    private final SimulationController controller;
+    private final Map<Integer, Packet> lastSentPackets = new HashMap<>();
 
-    public Node(int id) {
+    public Node(int id, SimulationController controller) {
         this.id = id;
+        this.controller = controller;
         this.crcUtil = new CRCUtil();
     }
 
@@ -36,82 +38,113 @@ public class Node implements Runnable {
         nodeThread.start();
     }
 
+    /**
+     * Wysyła pakiet danych do innego węzła.
+     */
     public void sendData(Node target, String message) {
         if (!isActive) {
             Logger.log("Węzeł " + id + " jest nieaktywny – nie można wysłać danych.");
             return;
         }
 
-        String data = "";
+        String data;
         try {
             if (currentFault != null && currentFault.getType() == ErrorType.CRC_FAILURE && currentFault.isActive()) {
-                data = crcUtil.appendCRC(message, ""); //generowany jest wyjatek IndexOutOfBounds
+                data = crcUtil.appendCRC(message, ""); // generuje wyjątek
                 Logger.log("Węzeł " + id + " generuje błędne CRC. (CRC_FAILURE)");
             } else {
                 data = crcUtil.appendCRC(message, polynomial);
             }
         } catch (Exception e) {
-            Logger.log("Błąd przy obliczaniu CRC w węźle " + id);
-            System.out.println(e.getMessage());
+            Logger.log("Błąd przy obliczaniu CRC w węźle " + id + ": " + e.getMessage());
             return;
         }
+
+        String correctData = data;
 
         if (currentFault != null && currentFault.isActive() && currentFault.getType() == ErrorType.BIT_FLIP) {
             data = flipRandomBit(data);
         }
 
         Packet packet = new Packet(data, this.id, target.getId());
-        Logger.log("Węzeł " + id + " wysyła pakiet z wiadomością: " + message +
-                " do węzła " + target.getId() + ": pakiet bitów zabezpieczonych CRC: " + data);
+        Packet correctPacket = new Packet(correctData, this.id, target.getId());
 
-        if (currentFault != null && currentFault.isActive()) {
-            if(currentFault.getType() == ErrorType.DELAY) {
-                packet.setIsDelayed(true);
-            }
-            else if(currentFault.getType() == ErrorType.PACKET_DROP) {
-                Logger.log("Węzeł " + id + ": pakiet został utracony. (PACKET_DROP)");
-                return;
-            }
+        if (currentFault != null && currentFault.getType() == ErrorType.DELAY) {
+            int currentDelay = new Random().nextInt(700);
+            packet.setIsDelayed(true);
+            packet.setDelay(currentDelay + packet.getDelay());
+            Logger.log("Węzeł " + id + ": pakiet opóźniony o " + packet.getDelay() + " ms.");
         }
+
+        // Utrata pakietu
+        if (currentFault != null && currentFault.getType() == ErrorType.PACKET_DROP) {
+            Logger.log("Węzeł " + id + ": pakiet został utracony. (PACKET_DROP)");
+            return;
+        }
+
+        // Zapisz ostatnio wysłany pakiet (do ewentualnej retransmisji)
+        lastSentPackets.put(target.getId(), correctPacket);
+
+        Logger.log("Węzeł " + id + " wysyła pakiet do " + target.getId() +
+                " z wiadomością: " + message + ", dane (z CRC): " + data);
 
         try {
             target.getQueue().put(packet);
         } catch (InterruptedException e) {
-            Logger.log("Błąd wysyłki pakietu od węzła " + this.id);
+            Logger.log("Błąd wysyłki pakietu od węzła " + this.id + " do węzła " + target.getId());
         }
     }
 
-    public void setCrcPolynomial(String poly) {
-        this.polynomial = poly;
-    }
-
+    /**
+     * Odbieranie pakietu.
+     */
     public void receivePacket(Packet packet) throws InterruptedException {
         if (!isActive) {
             Logger.log("Węzeł " + id + " nieaktywny – pakiet odrzucony.");
             return;
         }
 
-        if(packet.isDelayed()) {
-            int delay = new Random().nextInt(700) + 100;
-            Logger.log("Opóźnienie jest równe " + delay + " ms + standardowe opóźnienie 200 ms.");
-            Thread.sleep(delay);
+        Node sourceNode = findNeighborById(packet.getSourceId());
+        if (sourceNode == null) return;
+
+        // Animacja przychodzącego pakietu
+        if (controller != null && controller.getGraphPanel() != null) {
+            controller.getGraphPanel().animateTransmission(sourceNode, this, packet.getDelay());
         }
 
-        Thread.sleep(200);
+        Thread.sleep(packet.getDelay());
 
-        if (currentFault != null && Objects.requireNonNull(currentFault).isActive() && Objects.requireNonNull(currentFault).getType() == ErrorType.PACKET_DROP) {
-            Logger.log("Węzeł " + id + ": pakiet został utracony. (PACKET_DROP)");
+        // Obsługa ACK
+        if (packet.isAck()) {
+            if (packet.isAckPositive()) {
+                Logger.log("Węzeł " + id + " otrzymał potwierdzenie ACK od " + packet.getSourceId());
+            } else {
+                Logger.log("Węzeł " + id + " otrzymał NACK – retransmisja pakietu");
+                Packet last = lastSentPackets.get(packet.getSourceId());
+                if (last != null) {
+                    repairFault();
+                    sendData(sourceNode, crcUtil.extractMessage(last.getData(), polynomial));
+                }
+            }
             return;
         }
 
+        // Walidacja danych
         boolean valid = crcUtil.validateCRC(packet, polynomial);
 
         if (valid) {
-            Logger.log("Węzeł " + id + " odebrał poprawny pakiet od węzła " + packet.getSourceId() +
-                    " z wiadomością: " + crcUtil.extractMessage(packet.getData(), polynomial) + ", bity: " + packet.getData());
+            Logger.log("Węzeł " + id + " odebrał POPRAWNY pakiet od " + packet.getSourceId() +
+                    ": " + crcUtil.extractMessage(packet.getData(), polynomial));
+
+            // Wyślij ACK pozytywny
+            Packet ack = Packet.createAckPacket(id, packet.getSourceId(), true);
+            sourceNode.getQueue().put(ack);
         } else {
-            Logger.log("Węzeł " + id + " wykrył BŁĄD w pakiecie od węzła " + packet.getSourceId() +
-                    " (CRC niepoprawne), wiadomość: " + crcUtil.extractMessage(packet.getData(), polynomial) + ", bity: " + packet.getData());
+            Logger.log("Węzeł " + id + " wykrył BŁĄD w pakiecie od " + packet.getSourceId() +
+                    " – CRC niepoprawne!");
+            // Wyślij ACK negatywny (żądanie retransmisji)
+            Packet nack = Packet.createAckPacket(id, packet.getSourceId(), false);
+            sourceNode.getQueue().put(nack);
         }
     }
 
@@ -128,6 +161,25 @@ public class Node implements Runnable {
         }
     }
 
+    // --- Pomocnicze metody ---
+
+    private Node findNeighborById(int id) {
+        for (Node n : neighbors) {
+            if (n.getId() == id) return n;
+        }
+        return null;
+    }
+
+    private String flipRandomBit(String data) {
+        if (data == null || data.isEmpty()) return data;
+        Random random = new Random();
+        int index = random.nextInt(data.length());
+        char[] bits = data.toCharArray();
+        bits[index] = (bits[index] == '0') ? '1' : '0';
+        return new String(bits);
+    }
+
+    // --- Inne istniejące metody ---
     public void injectFault(ErrorType type) {
         this.currentFault = new Fault(type);
         this.isActive = type != ErrorType.NODE_FREEZE;
@@ -140,25 +192,18 @@ public class Node implements Runnable {
             currentFault.deactivate();
             isActive = true;
             currentFault = null;
+            controller.getGraphPanel().updateNodeColor(this, true);
         }
     }
 
-    private String flipRandomBit(String data) {
-        if (data == null || data.isEmpty()) return data;
-
-        Random random = new Random();
-        int index = random.nextInt(data.length());
-
-        char[] bits = data.toCharArray();
-        bits[index] = (bits[index] == '0') ? '1' : '0';
-
-        return new String(bits);
+    public void setCrcPolynomial(String polynomial) {
+        this.polynomial = polynomial;
     }
 
+    // --- Gettery ---
     public int getId() { return id; }
     public BlockingQueue<Packet> getQueue() { return incomingQueue; }
     public boolean isActive() { return isActive; }
     public List<Node> getNeighbors() { return neighbors; }
-    public Node getNeighbor(int id) { return neighbors.get(id); }
     public Fault getCurrentFault() { return currentFault; }
 }

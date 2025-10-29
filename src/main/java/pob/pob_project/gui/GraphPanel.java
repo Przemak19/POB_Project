@@ -2,6 +2,7 @@ package pob.pob_project.gui;
 
 import javafx.animation.FillTransition;
 import javafx.animation.PathTransition;
+import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
@@ -67,23 +68,33 @@ public class GraphPanel extends Pane {
         }
     }
 
-    /** Animacja przesyłu danych między dwoma węzłami. */
-    public void animateTransmission(Node from, Node to) {
+    /**
+     * Animacja przesyłu danych między dwoma węzłami z określonym czasem.
+     * Pozwala dopasować długość animacji do czasu rzeczywistego przesyłu.
+     */
+    public void animateTransmission(Node from, Node to, long durationMs) {
         Circle c1 = nodeCircles.get(from);
         Circle c2 = nodeCircles.get(to);
         if (c1 == null || c2 == null) return;
 
+        // Mała kula symbolizująca pakiet
         Circle packet = new Circle(5, Color.LIMEGREEN);
-        getChildren().add(packet);
+        Platform.runLater(() -> getChildren().add(packet));
 
         Path path = new Path();
         path.getElements().add(new MoveTo(c1.getCenterX(), c1.getCenterY()));
         path.getElements().add(new LineTo(c2.getCenterX(), c2.getCenterY()));
 
-        PathTransition transition = new PathTransition(Duration.seconds(1.5), path, packet);
+        // Czas animacji = durationMs (ms)
+        double seconds = Math.max(durationMs / 1000.0, 0.3); // minimum 0.3 sekundy dla widoczności
+        PathTransition transition = new PathTransition(Duration.seconds(seconds), path, packet);
         transition.setCycleCount(1);
-        transition.setOnFinished(e -> getChildren().remove(packet));
-        transition.play();
+        transition.setOnFinished(e -> Platform.runLater(() -> getChildren().remove(packet)));
+        Platform.runLater(transition::play);
+    }
+
+    public void animateTransmission(Node from, Node to) {
+        animateTransmission(from, to, 1500);
     }
 
     /** Miganie węzła z błędem. */

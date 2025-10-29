@@ -14,9 +14,10 @@ public class MainApp extends Application {
         controller = new SimulationController();
         controller.initializeNetwork();
         controller.startSimulation();
-
         MainWindow window = new MainWindow(controller);
-        Scene scene = new Scene(window, 1000, 1000);
+        Scene scene = new Scene(window, 1200, 1200);
+
+        controller.setGraphPanel(window.getGraphPanel());
 
         stage.setTitle("Symulacja");
         stage.setScene(scene);

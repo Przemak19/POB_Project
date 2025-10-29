@@ -21,4 +21,8 @@ public class MainWindow extends BorderPane {
         setPadding(new Insets(10));
         setStyle("-fx-background-color: #1e1e1e;");
     }
+
+    public GraphPanel getGraphPanel() {
+        return graphPanel;
+    }
 }

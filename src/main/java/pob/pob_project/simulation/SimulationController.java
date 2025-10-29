@@ -2,13 +2,15 @@ package pob.pob_project.simulation;
 
 import pob.pob_project.error.ErrorInjector;
 import pob.pob_project.error.ErrorType;
+import pob.pob_project.gui.GraphPanel;
 import pob.pob_project.network.NetworkGraph;
 import pob.pob_project.network.Node;
 
 public class SimulationController {
     private final NetworkGraph graph;
     private final ErrorInjector errorInjector;
-    private String crcPolynomial = "1010";
+    private String crcPolynomial;
+    private GraphPanel graphPanel;
 
     public SimulationController() {
         graph = new NetworkGraph();
@@ -18,7 +20,7 @@ public class SimulationController {
     public void initializeNetwork() {
         // Tworzenie 10 węzłów
         for (int i = 0; i < 10; i++) {
-            Node node = new Node(i);
+            Node node = new Node(i, this);
             graph.addNode(node);
         }
 
@@ -41,6 +43,7 @@ public class SimulationController {
         for (Node node : graph.getNodes()) {
             node.start();
         }
+        setCrcPolynomial("1010");
         Logger.log("Symulacja uruchomiona.");
     }
 
@@ -84,5 +87,13 @@ public class SimulationController {
             node.setCrcPolynomial(newPoly);
         }
         Logger.log("Zmieniono wielomian CRC na: " + newPoly);
+    }
+
+    public void setGraphPanel(GraphPanel panel) {
+        this.graphPanel = panel;
+    }
+
+    public GraphPanel getGraphPanel() {
+        return graphPanel;
     }
 }
