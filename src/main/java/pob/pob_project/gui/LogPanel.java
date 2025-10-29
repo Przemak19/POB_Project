@@ -105,9 +105,13 @@ public class LogPanel extends VBox {
 
     private static String extractBits(String msg) {
         if (msg.contains("]: ")) {
-            int start = msg.indexOf("]: ");
-            int end = msg.indexOf(".");
-            return msg.substring(start + 2, end);
+            int start = msg.indexOf("]: ") + 3;
+            int end = msg.indexOf('.', start);
+
+            if (end == -1) end = msg.length();
+            if (start < end) {
+                return msg.substring(start, end);
+            }
         }
         return "";
     }

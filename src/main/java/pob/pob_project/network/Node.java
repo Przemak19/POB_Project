@@ -63,7 +63,7 @@ public class Node implements Runnable {
         String correctData = data;
 
         if (currentFault != null && currentFault.isActive() && currentFault.getType() == ErrorType.BIT_FLIP) {
-            data = flipRandomBit(data);
+            data = flipRandomBit(data, polynomial);
         }
 
         Packet packet = new Packet(data, this.id, target.getId());
@@ -86,7 +86,7 @@ public class Node implements Runnable {
         lastSentPackets.put(target.getId(), correctPacket);
 
         Logger.log("Komputer " + id + ": wysyła pakiet do komputer " + target.getId() +
-                " z wiadomością: " + message + ", dane (z CRC) [bity]: " + data + ".");
+                " z wiadomością: " + message + ", CRC [bity]: " + crcUtil.extractCRC(correctData, polynomial) + ".");
 
         try {
             target.getQueue().put(packet);
@@ -134,14 +134,14 @@ public class Node implements Runnable {
 
         if (valid) {
             Logger.log("Komputer " + id + ": odebrał POPRAWNY pakiet od komputer " + packet.getSourceId() +
-                    " " + crcUtil.extractMessage(packet.getData(), polynomial) + ", dane (z CRC) [bity]: " + packet.getData() + ".");
+                    " " + crcUtil.extractMessage(packet.getData(), polynomial) + ", CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + ".");
 
             // Wyślij ACK pozytywny
             Packet ack = Packet.createAckPacket(id, packet.getSourceId(), true);
             sourceNode.getQueue().put(ack);
         } else {
             Logger.log("Komputer " + id + ": wykrył BŁĄD w pakiecie od komputer " + packet.getSourceId() +
-                    ": " + crcUtil.extractMessage(packet.getData(),polynomial) + " - CRC niepoprawne, dane (z CRC) [bity]: " + packet.getData() + ".");
+                    ": " + crcUtil.extractMessage(packet.getData(),polynomial) + " - CRC niepoprawne, CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + ".");
             // Wyślij ACK negatywny (żądanie retransmisji)
             Packet nack = Packet.createAckPacket(id, packet.getSourceId(), false);
             sourceNode.getQueue().put(nack);
@@ -168,10 +168,10 @@ public class Node implements Runnable {
         return null;
     }
 
-    private String flipRandomBit(String data) {
+    private String flipRandomBit(String data, String polynomial) {
         if (data == null || data.isEmpty()) return data;
         Random random = new Random();
-        int index = random.nextInt(data.length());
+        int index = random.nextInt(data.length()-polynomial.length() - 1, data.length());
         char[] bits = data.toCharArray();
         bits[index] = (bits[index] == '0') ? '1' : '0';
         return new String(bits);
