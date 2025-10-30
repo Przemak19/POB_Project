@@ -189,7 +189,7 @@ public class Node implements Runnable {
             currentFault.deactivate();
             isActive = true;
             currentFault = null;
-            controller.getGraphPanel().updateNodeColor(this, true);
+            controller.getGraphPanel().updateNodeStatus(this);
         }
     }
 

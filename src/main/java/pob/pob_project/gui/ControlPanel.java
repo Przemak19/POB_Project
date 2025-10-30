@@ -42,13 +42,13 @@ public class ControlPanel extends VBox {
             Node node = controller.getGraph().getNodes().get(nodeSpinner.getValue());
             ErrorType type = errorTypeBox.getValue();
             controller.injectError(node, type);
-            graphPanel.updateNodeColor(node, false);
+            graphPanel.updateNodeStatus(node);
         });
 
         repairBtn.setOnAction(e -> {
             Node node = controller.getGraph().getNodes().get(nodeSpinner.getValue());
             controller.repairNode(node);
-            graphPanel.updateNodeColor(node, true);
+            graphPanel.updateNodeStatus(node);
         });
 
         // --- Sekcja: wysyłanie danych

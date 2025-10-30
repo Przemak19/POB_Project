@@ -23,6 +23,8 @@ public class GraphPanel extends Pane {
 
     private SimulationController controller;
     private Map<Node, Circle> nodeCircles = new HashMap<>();
+    private Map<Node, Text> nodeLabels = new HashMap<>();
+    private Map<Node, Text> errorLabels = new HashMap<>();
     private List<Line> connections = new ArrayList<>();
 
     public GraphPanel(SimulationController controller) {
@@ -38,6 +40,7 @@ public class GraphPanel extends Pane {
         double radius = 200;
 
         for (int i = 0; i < nodes.size(); i++) {
+            Node node = nodes.get(i);
             double angle = 2 * Math.PI * i / nodes.size();
             double x = centerX + radius * Math.cos(angle);
             double y = centerY + radius * Math.sin(angle);
@@ -48,12 +51,16 @@ public class GraphPanel extends Pane {
 
             Text label = new Text(x - 4, y + 5, String.valueOf(nodes.get(i).getId()));
             label.setFill(Color.BLACK);
+            nodeCircles.put(node, circle);
+            nodeLabels.put(node, label);
 
-            nodeCircles.put(nodes.get(i), circle);
-            getChildren().addAll(circle, label);
+            Text errorLabel = new Text(x - 25, y + 50, "");
+            errorLabel.setFill(Color.RED);
+            errorLabels.put(node, errorLabel);
+
+            getChildren().addAll(circle, label, errorLabel);
         }
 
-        // Prosty pierścień
         for (int i = 0; i < controller.getGraph().getConnections().size(); i++) {
             Node a = controller.getGraph().getConnections().get(i).getNodeA();
             Node b = controller.getGraph().getConnections().get(i).getNodeB();
@@ -64,7 +71,7 @@ public class GraphPanel extends Pane {
             line.setStroke(Color.GRAY);
             line.setStrokeWidth(2);
             connections.add(line);
-            getChildren().addFirst( line);
+            getChildren().addFirst(line);
         }
     }
 
@@ -93,14 +100,26 @@ public class GraphPanel extends Pane {
         Platform.runLater(transition::play);
     }
 
-    public void animateTransmission(Node from, Node to) {
-        animateTransmission(from, to, 1500);
-    }
+    public void updateNodeStatus(Node node) {
+        Platform.runLater(() -> {
+            Circle circle = nodeCircles.get(node);
+            Text errorText = errorLabels.get(node);
 
-    public void updateNodeColor(Node node, boolean active) {
-        Circle circle = nodeCircles.get(node);
-        if (circle != null) {
-            circle.setFill(active ? Color.LIGHTGREEN : Color.RED);
-        }
+            if (circle != null) {
+                if (node.getCurrentFault() == null) {
+                    circle.setFill(Color.LIGHTGREEN);
+                } else {
+                    circle.setFill(Color.TOMATO);
+                }
+            }
+
+            if (errorText != null) {
+                if (node.getCurrentFault() != null && node.getCurrentFault().isActive()) {
+                    errorText.setText(node.getCurrentFault().getType().name());
+                } else {
+                    errorText.setText("");
+                }
+            }
+        });
     }
 }
