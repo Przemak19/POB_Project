@@ -62,7 +62,7 @@ public class Node implements Runnable {
                 data = crcUtil.appendCRC(message, polynomial);
             }
         } catch (Exception e) {
-            Logger.log("Komputer " + id + ": błąd przy obliczaniu CRC: " + e.getMessage());
+            Logger.log("Komputer " + id + ": błąd przy obliczaniu CRC.");
             errorCount++;
             updateStatsInUI();
             return;
@@ -88,14 +88,6 @@ public class Node implements Runnable {
             Logger.log("Komputer " + id + ": pakiet opóźniony o " + packet.getDelay() + " ms.");
         }
 
-        // Utrata pakietu
-        if (currentFault != null && currentFault.getType() == ErrorType.PACKET_DROP) {
-            Logger.log("Komputer " + id + ": pakiet został utracony. (PACKET_DROP)");
-            errorCount++;
-            updateStatsInUI();
-            return;
-        }
-
         // Zapisz ostatnio wysłany pakiet (do ewentualnej retransmisji)
         lastSentPackets.put(target.getId(), correctPacket);
         sentCount++;
@@ -103,6 +95,14 @@ public class Node implements Runnable {
 
         Logger.log("Komputer " + id + ": wysyła pakiet do komputer " + target.getId() +
                 " z wiadomością: " + message + ", CRC [bity]: " + crcUtil.extractCRC(correctData, polynomial) + ".");
+
+        // Utrata pakietu
+        if (currentFault != null && currentFault.getType() == ErrorType.PACKET_DROP) {
+            Logger.log("Komputer " + id + ": pakiet został utracony. (PACKET_DROP)");
+            errorCount++;
+            updateStatsInUI();
+            return;
+        }
 
         try {
             target.getQueue().put(packet);
@@ -146,6 +146,7 @@ public class Node implements Runnable {
             } else {
                 Logger.log("Komputer " + id + ": otrzymał NACK - retransmisja pakietu.");
                 Packet last = lastSentPackets.get(packet.getSourceId());
+                receivedCount++;
                 if (last != null) {
                     repairFault();
                     sendData(sourceNode, crcUtil.extractMessage(last.getData(), polynomial));
@@ -168,7 +169,7 @@ public class Node implements Runnable {
         } else {
             Logger.log("Komputer " + id + ": wykrył BŁĄD w pakiecie od komputer " + packet.getSourceId() +
                     ": " + crcUtil.extractMessage(packet.getData(),polynomial) + " - CRC niepoprawne, CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + ".");
-
+            receivedCount++;
             errorCount++;
             // Wyślij ACK negatywny (żądanie retransmisji)
             Packet nack = Packet.createAckPacket(id, packet.getSourceId(), false);
