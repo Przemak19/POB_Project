@@ -26,6 +26,7 @@ public class GraphPanel extends Pane {
     private Map<Node, Text> nodeLabels = new HashMap<>();
     private Map<Node, Text> errorLabels = new HashMap<>();
     private List<Line> connections = new ArrayList<>();
+    private Map<Node, Text> statsLabels = new HashMap<>();
 
     public GraphPanel(SimulationController controller) {
         this.controller = controller;
@@ -35,9 +36,9 @@ public class GraphPanel extends Pane {
 
     private void drawGraph() {
         List<Node> nodes = controller.getGraph().getNodes();
-        double centerX = (double) WIDTH / 2;
-        double centerY = (double) HEIGHT / 2;
-        double radius = 200;
+        double centerX = (double) WIDTH / 1.5;
+        double centerY = (double) HEIGHT / 1.5;
+        double radius = 300;
 
         for (int i = 0; i < nodes.size(); i++) {
             Node node = nodes.get(i);
@@ -51,14 +52,46 @@ public class GraphPanel extends Pane {
 
             Text label = new Text(x - 4, y + 5, String.valueOf(nodes.get(i).getId()));
             label.setFill(Color.BLACK);
-            nodeCircles.put(node, circle);
-            nodeLabels.put(node, label);
 
             Text errorLabel = new Text(x - 25, y + 50, "");
             errorLabel.setFill(Color.RED);
-            errorLabels.put(node, errorLabel);
 
-            getChildren().addAll(circle, label, errorLabel);
+            Rectangle statsBackground = new Rectangle(0, 0, 220, 130);
+            statsBackground.setFill(Color.rgb(60, 60, 60, 0.8));
+            statsBackground.setArcWidth(10);
+            statsBackground.setArcHeight(10);
+            statsBackground.setVisible(false);
+
+            Text statsLabel = new Text(20, 20, "");
+            statsLabel.setFill(Color.WHITE);
+            statsLabel.setStyle("-fx-font-size: 14px;");
+            statsLabel.setVisible(false);
+
+            nodeCircles.put(node, circle);
+            nodeLabels.put(node, label);
+            errorLabels.put(node, errorLabel);
+            statsLabels.put(node, statsLabel);
+
+            //pokaż statystyki
+            circle.setOnMouseEntered(e -> {
+                updateNodeStats(node);
+                statsLabel.setVisible(true);
+                statsBackground.setVisible(true);
+                circle.setScaleX(1.15);
+                circle.setScaleY(1.15);
+                circle.setStroke(Color.YELLOW);
+            });
+
+            //ukryj statystyki
+            circle.setOnMouseExited(e -> {
+                statsLabel.setVisible(false);
+                statsBackground.setVisible(false);
+                circle.setScaleX(1.0);
+                circle.setScaleY(1.0);
+                circle.setStroke(Color.WHITE);
+            });
+
+            getChildren().addAll(circle, label, errorLabel, statsBackground, statsLabel);
         }
 
         for (int i = 0; i < controller.getGraph().getConnections().size(); i++) {
@@ -73,6 +106,24 @@ public class GraphPanel extends Pane {
             connections.add(line);
             getChildren().addFirst(line);
         }
+    }
+
+    public void updateNodeStats(Node node) {
+        Platform.runLater(() -> {
+            Text stats = statsLabels.get(node);
+            if (stats != null) {
+                stats.setText(
+                        String.format("Komputer: %d\n\nWysłane: %d\nOdebrane: %d\nBłędy: %d\nAktualny błąd: %s",
+                                node.getId(),
+                                node.getSentCount(),
+                                node.getReceivedCount(),
+                                node.getErrorCount(),
+                                node.getCurrentErrorText()
+                        )
+                );
+            }
+            updateNodeStatus(node);
+        });
     }
 
     /**

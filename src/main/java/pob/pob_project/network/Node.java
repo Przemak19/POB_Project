@@ -23,6 +23,10 @@ public class Node implements Runnable {
     private final SimulationController controller;
     private final Map<Integer, Packet> lastSentPackets = new HashMap<>();
 
+    private int sentCount = 0;
+    private int receivedCount = 0;
+    private int errorCount = 0;
+
     public Node(int id, SimulationController controller) {
         this.id = id;
         this.controller = controller;
@@ -44,6 +48,8 @@ public class Node implements Runnable {
     public void sendData(Node target, String message) {
         if (!isActive) {
             Logger.log("Komputer " + id + ": nieaktywny - nie można wysłać danych. (NODE_FREEZE)");
+            errorCount++;
+            updateStatsInUI();
             return;
         }
 
@@ -57,6 +63,8 @@ public class Node implements Runnable {
             }
         } catch (Exception e) {
             Logger.log("Komputer " + id + ": błąd przy obliczaniu CRC: " + e.getMessage());
+            errorCount++;
+            updateStatsInUI();
             return;
         }
 
@@ -64,6 +72,8 @@ public class Node implements Runnable {
 
         if (currentFault != null && currentFault.isActive() && currentFault.getType() == ErrorType.BIT_FLIP) {
             data = flipRandomBit(data, polynomial);
+            errorCount++;
+            updateStatsInUI();
         }
 
         Packet packet = new Packet(data, this.id, target.getId());
@@ -73,17 +83,23 @@ public class Node implements Runnable {
             int currentDelay = new Random().nextInt(700);
             packet.setIsDelayed(true);
             packet.setDelay(currentDelay + packet.getDelay());
+            errorCount++;
+            updateStatsInUI();
             Logger.log("Komputer " + id + ": pakiet opóźniony o " + packet.getDelay() + " ms.");
         }
 
         // Utrata pakietu
         if (currentFault != null && currentFault.getType() == ErrorType.PACKET_DROP) {
             Logger.log("Komputer " + id + ": pakiet został utracony. (PACKET_DROP)");
+            errorCount++;
+            updateStatsInUI();
             return;
         }
 
         // Zapisz ostatnio wysłany pakiet (do ewentualnej retransmisji)
         lastSentPackets.put(target.getId(), correctPacket);
+        sentCount++;
+        updateStatsInUI();
 
         Logger.log("Komputer " + id + ": wysyła pakiet do komputer " + target.getId() +
                 " z wiadomością: " + message + ", CRC [bity]: " + crcUtil.extractCRC(correctData, polynomial) + ".");
@@ -92,6 +108,8 @@ public class Node implements Runnable {
             target.getQueue().put(packet);
         } catch (InterruptedException e) {
             Logger.log("Komputer " + this.id + ": błąd wysyłki pakietu do komputer " + target.getId() + ".");
+            errorCount++;
+            updateStatsInUI();
         }
     }
 
@@ -101,6 +119,8 @@ public class Node implements Runnable {
     public void receivePacket(Packet packet) throws InterruptedException {
         if (!isActive) {
             Logger.log("Komputer " + id + ": nieaktywny - pakiet odrzucony.");
+            errorCount++;
+            updateStatsInUI();
             return;
         }
 
@@ -112,12 +132,17 @@ public class Node implements Runnable {
             controller.getGraphPanel().animateTransmission(sourceNode, this, packet.getDelay());
         }
 
+        if(packet.isDelayed()) {
+            errorCount++;
+        }
+
         Thread.sleep(packet.getDelay());
 
         // Obsługa ACK
         if (packet.isAck()) {
             if (packet.isAckPositive()) {
                 Logger.log("Komputer " + id + ": otrzymał potwierdzenie ACK od komputer " + packet.getSourceId() + ".");
+                receivedCount++;
             } else {
                 Logger.log("Komputer " + id + ": otrzymał NACK - retransmisja pakietu.");
                 Packet last = lastSentPackets.get(packet.getSourceId());
@@ -135,17 +160,22 @@ public class Node implements Runnable {
         if (valid) {
             Logger.log("Komputer " + id + ": odebrał POPRAWNY pakiet od komputer " + packet.getSourceId() +
                     " " + crcUtil.extractMessage(packet.getData(), polynomial) + ", CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + ".");
-
+            receivedCount++;
             // Wyślij ACK pozytywny
             Packet ack = Packet.createAckPacket(id, packet.getSourceId(), true);
             sourceNode.getQueue().put(ack);
+            sentCount++;
         } else {
             Logger.log("Komputer " + id + ": wykrył BŁĄD w pakiecie od komputer " + packet.getSourceId() +
                     ": " + crcUtil.extractMessage(packet.getData(),polynomial) + " - CRC niepoprawne, CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + ".");
+
+            errorCount++;
             // Wyślij ACK negatywny (żądanie retransmisji)
             Packet nack = Packet.createAckPacket(id, packet.getSourceId(), false);
             sourceNode.getQueue().put(nack);
+            sentCount++;
         }
+        updateStatsInUI();
     }
 
     @Override
@@ -197,10 +227,21 @@ public class Node implements Runnable {
         this.polynomial = polynomial;
     }
 
+    private void updateStatsInUI() {
+        if (controller != null && controller.getGraphPanel() != null)
+            controller.getGraphPanel().updateNodeStats(this);
+    }
+
     // --- Gettery ---
     public int getId() { return id; }
     public BlockingQueue<Packet> getQueue() { return incomingQueue; }
     public boolean isActive() { return isActive; }
     public List<Node> getNeighbors() { return neighbors; }
     public Fault getCurrentFault() { return currentFault; }
+    public String getCurrentErrorText() {
+        return currentFault != null && currentFault.isActive() ? currentFault.getType().name() : "brak";
+    }
+    public int getErrorCount() { return errorCount; }
+    public int getSentCount() { return sentCount; }
+    public int getReceivedCount() { return receivedCount; }
 }
