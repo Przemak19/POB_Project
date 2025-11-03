@@ -95,7 +95,7 @@ public class CRCUtil {
      * Sprawdza poprawność CRC, jeśli wynik składa się z zer, zwraca true.
      * @param packet Pakiet z danymi.
      * @param polynomial Wielomian, przy pomocy którego dane są zabezpieczone.
-     * @return Wartość true lub false.
+     * @return Wartość {@code true} lub {@code false}.
      */
     public boolean validateCRC(Packet packet, String polynomial) {
 

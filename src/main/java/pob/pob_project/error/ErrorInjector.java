@@ -4,7 +4,7 @@ import pob.pob_project.network.Node;
 
 /**
  * Klasa odpowiedzialna za wstrzykiwanie błędów (usterki) do węzłów sieci.
- * Umożliwia symulację różnych typów błędów, z typu wyliczeniowego ErrorType.
+ * Umożliwia symulację różnych typów błędów, z typu wyliczeniowego ({@link ErrorType}).
  * Klasa ta jest wykorzystywana przez kontroler symulacji do testowania zachowania sieci w warunkach błędów.
  */
 public class ErrorInjector {
