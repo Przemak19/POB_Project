@@ -1,6 +1,5 @@
 package pob.pob_project.gui;
 
-import javafx.animation.FillTransition;
 import javafx.animation.PathTransition;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
@@ -16,24 +15,51 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Klasa odpowiedzialna za wizualizację grafu sieci w symulacji.
+ * Reprezentuje węzły, połączenia między nimi oraz wizualne efekty transmisji danych i błędów.
+ */
 public class GraphPanel extends Pane {
 
+    /** Szerokość panelu graficznego w pikselach. */
     private final int WIDTH = 700;
+
+    /** Wysokość panelu graficznego w pikselach. */
     private final int HEIGHT = 600;
 
+    /** Kontroler zarządzający logiką i stanem symulacji. */
     private SimulationController controller;
+
+    /** Mapa powiązań węzłów z ich graficznymi reprezentacjami. */
     private Map<Node, Circle> nodeCircles = new HashMap<>();
+
+    /** Mapa etykiet z identyfikatorami węzłów. */
     private Map<Node, Text> nodeLabels = new HashMap<>();
+
+    /** Mapa etykiet informujących o błędach węzłów. */
     private Map<Node, Text> errorLabels = new HashMap<>();
+
+    /** Lista linii reprezentujących połączenia pomiędzy węzłami. */
     private List<Line> connections = new ArrayList<>();
+
+    /** Mapa etykiet wyświetlających statystyki węzłów. */
     private Map<Node, Text> statsLabels = new HashMap<>();
 
+    /**
+     * Konstruktor klasy GraphPanel.
+     * Inicjalizuje panel i rysuje graf w oparciu o dane z kontrolera symulacji.
+     * @param controller Kontroler symulacji zarządzający węzłami i połączeniami.
+     */
     public GraphPanel(SimulationController controller) {
         this.controller = controller;
         setPrefSize(WIDTH, HEIGHT);
         drawGraph();
     }
 
+    /**
+     * Tworzy i rozmieszcza graficzne elementy reprezentujące węzły i połączenia grafu.
+     * Każdy węzeł ma etykietę, kolor, statystyki oraz reakcję na najechanie kursorem.
+     */
     private void drawGraph() {
         List<Node> nodes = controller.getGraph().getNodes();
         double centerX = (double) WIDTH / 1.5;
@@ -108,6 +134,10 @@ public class GraphPanel extends Pane {
         }
     }
 
+    /**
+     * Aktualizuje etykietę statystyk dla danego węzła (ilość wysłanych, odebranych i błędnych pakietów).
+     * @param node Węzeł, którego statystyki mają zostać zaktualizowane.
+     */
     public void updateNodeStats(Node node) {
         Platform.runLater(() -> {
             Text stats = statsLabels.get(node);
@@ -127,8 +157,11 @@ public class GraphPanel extends Pane {
     }
 
     /**
-     * Animacja przesyłu danych między dwoma węzłami z określonym czasem.
-     * Pozwala dopasować długość animacji do czasu rzeczywistego przesyłu.
+     * Animuje wizualny przesył danych pomiędzy dwoma węzłami.
+     * Na ekranie pojawia się mała kula symbolizująca pakiet, poruszająca się wzdłuż połączenia między węzłami.
+     * @param from Węzeł źródłowy (nadawca).
+     * @param to Węzeł docelowy (odbiorca).
+     * @param durationMs Czas trwania animacji w milisekundach.
      */
     public void animateTransmission(Node from, Node to, long durationMs) {
         Circle c1 = nodeCircles.get(from);
@@ -151,6 +184,11 @@ public class GraphPanel extends Pane {
         Platform.runLater(transition::play);
     }
 
+    /**
+     * Aktualizuje wygląd węzła (kolor i etykietę błędu) w zależności od jego aktualnego stanu.
+     * Zielony — węzeł działa poprawnie, czerwony — wystąpił błąd.
+     * @param node Węzeł, którego stan ma zostać zaktualizowany.
+     */
     public void updateNodeStatus(Node node) {
         Platform.runLater(() -> {
             Circle circle = nodeCircles.get(node);

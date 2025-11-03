@@ -7,11 +7,33 @@ import pob.pob_project.error.ErrorType;
 import pob.pob_project.network.Node;
 import pob.pob_project.simulation.SimulationController;
 
+/**
+ * Panel sterowania symulacją sieci komputerowej.
+ * Umożliwia użytkownikowi:
+ * <ul>
+ *     <li>Wstrzykiwanie i naprawianie błędów w wybranych węzłach,</li>
+ *     <li>Wysyłanie wiadomości między węzłami,</li>
+ *     <li>Zmianę wielomianu CRC,</li>
+ *     <li>Czyszczenie logów w panelu {@link LogPanel}.</li>
+ * </ul>
+ */
 public class ControlPanel extends VBox {
 
+    /**
+     * Główny kontroler logiki symulacji.
+     */
     private SimulationController controller;
+
+    /**
+     * Panel graficzny przedstawiający węzły i połączenia między nimi.
+     */
     private GraphPanel graphPanel;
 
+    /**
+     * Tworzy nowy panel sterowania dla danej symulacji.
+     * @param controller Kontroler symulacji, odpowiedzialny za logikę.
+     * @param graphPanel Panel graficzny przedstawiający sieć węzłów.
+     */
     public ControlPanel(SimulationController controller, GraphPanel graphPanel) {
         this.controller = controller;
         this.graphPanel = graphPanel;
@@ -129,6 +151,11 @@ public class ControlPanel extends VBox {
         );
     }
 
+    /**
+     * Wyświetla komunikat ostrzegawczy w oknie dialogowym.
+     * @param title Tytuł okna ostrzeżenia.
+     * @param message Treść wiadomości do wyświetlenia.
+     */
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
