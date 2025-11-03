@@ -12,8 +12,8 @@ public class CRCUtil {
 
     /**
      * Oblicza CRC dla dowolnego tekstu.
-     * @param message Tekst do zabezpieczenia
-     * @param polynomial dowolny wielomian
+     * @param message Tekst do zabezpieczenia.
+     * @param polynomial Dowolny wielomian.
      * @return CRC w postaci binarnej.
      */
     public String computeCRC(String message, String polynomial) {
@@ -57,10 +57,10 @@ public class CRCUtil {
     }
 
     /**
-     * Pomocnicza metoda — używa StandardCharsets.UTF_8.
-     * Tworzy prawdziwe bajty a nie pojedyncze znaki aby korzystać z polskich znaków.
-     * @param message Wiadomość do przekształcenia
-     * @return Wiadomość w postaci binarnej
+     * Pomocnicza metoda, która używa StandardCharsets.UTF_8.
+     * Tworzy prawdziwe bajty, a nie pojedyncze znaki, aby korzystać z polskich znaków.
+     * @param message Wiadomość do przekształcenia.
+     * @return Wiadomość w postaci binarnej.
      */
     private String toBinary(String message) {
         byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
@@ -71,13 +71,11 @@ public class CRCUtil {
         return bits.toString();
     }
 
-    //metoda wykonuje xor na bitach
-
     /**
-     * Wykonuje xpr na bitach.
-     * @param a Pierwszy bit
-     * @param b Drugi bit
-     * @return Wynik działania xor
+     * Wykonuje xor na bitach.
+     * @param a Pierwszy bit.
+     * @param b Drugi bit.
+     * @return Wynik działania xor.
      */
     private char xorBit(char a, char b) {
         return (a == b) ? '0' : '1';
@@ -86,18 +84,18 @@ public class CRCUtil {
     /**
      * Łączy wiadomość z wygenerowanym CRC.
      * @param message Wiadomość do połączenia z CRC.
-     * @param polynomial Wielomian do zabezpieczenia wiadomości
-     * @return Ciąg bitów z CRC
+     * @param polynomial Wielomian do zabezpieczenia wiadomości.
+     * @return Ciąg bitów z CRC.
      */
     public String appendCRC(String message, String polynomial) {
         return toBinary(message) + computeCRC(message, polynomial);
     }
 
     /**
-     * Sprawdza poprawność CRC, jeśli wynik jest zerami zwraca true.
-     * @param packet Pakiet z danymi
-     * @param polynomial Wielomian przy pomocy którego dane są zabezpieczone
-     * @return true lub false
+     * Sprawdza poprawność CRC, jeśli wynik składa się z zer, zwraca true.
+     * @param packet Pakiet z danymi.
+     * @param polynomial Wielomian, przy pomocy którego dane są zabezpieczone.
+     * @return Wartość true lub false.
      */
     public boolean validateCRC(Packet packet, String polynomial) {
 
@@ -126,8 +124,8 @@ public class CRCUtil {
 
     /**
      * Wyodrębnia wiadomość z ciągu bitów zawierającego CRC.
-     * @param dataWithCrc Ciąg bitów wiadomości + CRC
-     * @param polynomial Wielomian przy pomocy którego dane są zabezpieczone
+     * @param dataWithCrc Ciąg bitów wiadomości + CRC.
+     * @param polynomial Wielomian, przy pomocy którego dane są zabezpieczone.
      * @return Część wiadomości (bity bez CRC).
      */
     public String extractMessage(String dataWithCrc, String polynomial) {
@@ -141,9 +139,9 @@ public class CRCUtil {
 
     /**
      * Wyodrębnia CRC z ciągu bitów wiadomości + CRC.
-     * @param dataWithCrc ciąg bitów wiadomości + CRC
-     * @param polynomial Wielomian przy pomocy którego dane są zabezpieczone
-     * @return część CRC (reszta z dzielenia)
+     * @param dataWithCrc Ciąg bitów wiadomości + CRC.
+     * @param polynomial Wielomian, przy pomocy którego dane są zabezpieczone.
+     * @return część CRC (reszta z dzielenia).
      */
     public String extractCRC(String dataWithCrc, String polynomial) {
         if (dataWithCrc == null || polynomial == null || polynomial.isEmpty()) return "";
@@ -156,8 +154,8 @@ public class CRCUtil {
 
     /**
      * Zamienia ciąg bitów na String.
-     * @param bits Ciąg bitów
-     * @return String z bitów
+     * @param bits Ciąg bitów.
+     * @return String z bitów.
      */
     public String fromBinary(String bits) {
         if (bits == null || bits.isEmpty()) return "";
