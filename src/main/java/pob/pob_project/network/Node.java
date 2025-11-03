@@ -94,7 +94,7 @@ public class Node implements Runnable {
         updateStatsInUI();
 
         Logger.log("Komputer " + id + ": wysyła pakiet do komputer " + target.getId() +
-                " z wiadomością: " + message + ", CRC [bity]: " + crcUtil.extractCRC(correctData, polynomial) + ".");
+                " z wiadomością: " + message + ", CRC [bity]: " + crcUtil.extractCRC(correctData, polynomial) + " ");
 
         // Utrata pakietu
         if (currentFault != null && currentFault.getType() == ErrorType.PACKET_DROP) {
@@ -160,7 +160,7 @@ public class Node implements Runnable {
 
         if (valid) {
             Logger.log("Komputer " + id + ": odebrał POPRAWNY pakiet od komputer " + packet.getSourceId() +
-                    " " + crcUtil.extractMessage(packet.getData(), polynomial) + ", CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + ".");
+                    " " + crcUtil.extractMessage(packet.getData(), polynomial) + ", CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + " ");
             receivedCount++;
             // Wyślij ACK pozytywny
             Packet ack = Packet.createAckPacket(id, packet.getSourceId(), true);
@@ -168,7 +168,7 @@ public class Node implements Runnable {
             sentCount++;
         } else {
             Logger.log("Komputer " + id + ": wykrył BŁĄD w pakiecie od komputer " + packet.getSourceId() +
-                    ": " + crcUtil.extractMessage(packet.getData(),polynomial) + " - CRC niepoprawne, CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + ".");
+                    ": " + crcUtil.extractMessage(packet.getData(),polynomial) + " - CRC niepoprawne, CRC [bity]: " + crcUtil.extractCRC(packet.getData(), polynomial) + " ");
             receivedCount++;
             errorCount++;
             // Wyślij ACK negatywny (żądanie retransmisji)

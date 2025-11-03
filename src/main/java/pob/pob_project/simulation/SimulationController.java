@@ -52,6 +52,7 @@ public class SimulationController {
         if (polynomial == null) return false;
 
         return polynomial.length() >= 2
+                && polynomial.length() <= 32
                 && polynomial.matches("[01]+")
                 && polynomial.charAt(0) == '1';
     }

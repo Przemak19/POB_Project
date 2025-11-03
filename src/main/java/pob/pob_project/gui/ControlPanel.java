@@ -83,7 +83,9 @@ public class ControlPanel extends VBox {
             } else if(!controller.checkNeighbors(src, dst)) {
                 showAlert("Błędnie wybrane węzły", "Wybrane węzły nie są ze sobą połączone.");
             } else if(dataField.getText().isEmpty() || dataField.getText().isBlank()) {
-                showAlert("Brak wiadomość", "Podaj wiadomość do wysłania.");
+                showAlert("Brak wiadomości", "Podaj wiadomość do wysłania.");
+            } else if(dataField.getText().length() > 200) {
+                showAlert("Za długa wiadomość", "Skróć wiadomość do wysłania.");
             } else {
                 src.sendData(dst, dataField.getText());
 
@@ -103,10 +105,13 @@ public class ControlPanel extends VBox {
             if(controller.checkCrcPolynomial(crcField.getText().trim())) {
                 controller.setCrcPolynomial(crcField.getText().trim());
             } else {
-                showAlert("Nieprawidłowy wielomian CRC", "Wielomian musi mieć przynajmniej 2 bity, składać się z 0 i 1 oraz zaczynać się od 1.");
+                showAlert("Nieprawidłowy wielomian CRC", "Wielomian musi zawierać się w przedziale <2;32> bitów, składać się z 0 i 1 oraz zaczynać się od 1.");
             }
 
         });
+
+        Button clearLogsBtn = new Button("Wyczyść logi");
+        clearLogsBtn.setOnAction(e -> LogPanel.clearLog());
 
         getChildren().addAll(
                 title, new Separator(),
@@ -118,7 +123,9 @@ public class ControlPanel extends VBox {
                 toLabel, dstSpinner,
                 messageLabel, dataField, sendBtn,
                 new Separator(),
-                crcLabel, crcField, crcApply
+                crcLabel, crcField, crcApply,
+                new  Separator(),
+                clearLogsBtn
         );
     }
 
