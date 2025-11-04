@@ -8,4 +8,6 @@ module pob.pob_project {
     exports pob.pob_project.gui;
     exports pob.pob_project.simulation;
     exports pob.pob_project.network;
+    exports pob.pob_project.crc;
+    exports pob.pob_project.error;
 }
