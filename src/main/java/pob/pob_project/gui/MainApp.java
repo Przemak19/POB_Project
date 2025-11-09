@@ -33,7 +33,7 @@ public class MainApp extends Application {
         controller.initializeNetwork();
         controller.startSimulation();
         MainWindow window = new MainWindow(controller);
-        Scene scene = new Scene(window, 1200, 1200);
+        Scene scene = new Scene(window, 1200, 1000);
 
         controller.setGraphPanel(window.getGraphPanel());
 

@@ -25,7 +25,7 @@ public class GraphPanel extends Pane {
     private final int WIDTH = 700;
 
     /** Wysokość panelu graficznego w pikselach. */
-    private final int HEIGHT = 600;
+    private final int HEIGHT = 400;
 
     /** Kontroler zarządzający logiką i stanem symulacji. */
     private SimulationController controller;
@@ -64,7 +64,7 @@ public class GraphPanel extends Pane {
         List<Node> nodes = controller.getGraph().getNodes();
         double centerX = (double) WIDTH / 1.5;
         double centerY = (double) HEIGHT / 1.5;
-        double radius = 300;
+        double radius = 220;
 
         for (int i = 0; i < nodes.size(); i++) {
             Node node = nodes.get(i);

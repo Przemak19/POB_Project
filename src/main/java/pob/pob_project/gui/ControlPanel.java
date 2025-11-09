@@ -38,12 +38,12 @@ public class ControlPanel extends VBox {
         this.controller = controller;
         this.graphPanel = graphPanel;
 
-        setSpacing(15);
-        setPadding(new Insets(15));
+        setSpacing(5);
+        setPadding(new Insets(5));
         setStyle("-fx-background-color: #2b2b2b;");
 
         Label title = new Label("Sterowanie symulacją");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
+        title.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
 
         // --- Sekcja: wybór węzła
         Label nodeLabel = new Label("ID węzła:");
