@@ -36,14 +36,6 @@ public class NetworkGraph {
     }
 
     /**
-     * Zwraca listę wszystkich węzłów w grafie.
-     * @return Lista obiektów {@link Node}.
-     */
-    public List<Node> getNodes() {
-        return nodes;
-    }
-
-    /**
      * Zwraca listę wszystkich połączeń w grafie.
      * @return Lista obiektów {@link Connection}.
      */
@@ -51,6 +43,13 @@ public class NetworkGraph {
         return connections;
     }
 
+    /**
+     * Zwraca listę wszystkich węzłów w grafie.
+     * @return Lista obiektów {@link Node}.
+     */
+    public List<Node> getNodes() {
+        return nodes;
+    }
 
     /**
      * Zwraca listę sąsiadów dla danego węzła.
