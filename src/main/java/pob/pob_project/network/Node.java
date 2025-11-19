@@ -265,17 +265,6 @@ public class Node implements Runnable {
     }
 
     /**
-     * Wstrzykuje błąd określonego typu do węzła.
-     * Zmienia jego stan.
-     * @param type Typ błędu do wstrzyknięcia.
-     */
-    public void injectFault(ErrorType type) {
-        this.currentFault = new Fault(type);
-        this.isActive = type != ErrorType.NODE_FREEZE;
-        Logger.log("Komputer " + id + ": wstrzyknięto błąd " + type);
-    }
-
-    /**
      * Naprawia aktualny błąd i przywraca normalne działanie węzła.
      * Aktualizuje stan wizualny w interfejsie.
      */
@@ -287,6 +276,17 @@ public class Node implements Runnable {
             currentFault = null;
             controller.getGraphPanel().updateNodeStatus(this);
         }
+    }
+
+    /**
+     * Wstrzykuje błąd określonego typu do węzła.
+     * Zmienia jego stan.
+     * @param type Typ błędu do wstrzyknięcia.
+     */
+    public void injectFault(ErrorType type) {
+        this.currentFault = new Fault(type);
+        this.isActive = type != ErrorType.NODE_FREEZE;
+        Logger.log("Komputer " + id + ": wstrzyknięto błąd " + type);
     }
 
     /** Ustawia wielomian używany do obliczania CRC. */
