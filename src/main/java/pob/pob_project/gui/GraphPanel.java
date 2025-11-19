@@ -157,34 +157,6 @@ public class GraphPanel extends Pane {
     }
 
     /**
-     * Animuje wizualny przesył danych pomiędzy dwoma węzłami.
-     * Na ekranie pojawia się mała kula symbolizująca pakiet, poruszająca się wzdłuż połączenia między węzłami.
-     * @param from Węzeł źródłowy (nadawca).
-     * @param to Węzeł docelowy (odbiorca).
-     * @param durationMs Czas trwania animacji w milisekundach.
-     */
-    public void animateTransmission(Node from, Node to, long durationMs) {
-        Circle c1 = nodeCircles.get(from);
-        Circle c2 = nodeCircles.get(to);
-        if (c1 == null || c2 == null) return;
-
-        // Mała kula symbolizująca pakiet
-        Circle packet = new Circle(5, Color.LIMEGREEN);
-        Platform.runLater(() -> getChildren().add(packet));
-
-        Path path = new Path();
-        path.getElements().add(new MoveTo(c1.getCenterX(), c1.getCenterY()));
-        path.getElements().add(new LineTo(c2.getCenterX(), c2.getCenterY()));
-
-        // Czas animacji = durationMs (ms)
-        double seconds = Math.max(durationMs / 1000.0, 0.3); // minimum 0.3 sekundy dla widoczności
-        PathTransition transition = new PathTransition(Duration.seconds(seconds), path, packet);
-        transition.setCycleCount(1);
-        transition.setOnFinished(e -> Platform.runLater(() -> getChildren().remove(packet)));
-        Platform.runLater(transition::play);
-    }
-
-    /**
      * Aktualizuje wygląd węzła (kolor i etykietę błędu) w zależności od jego aktualnego stanu.
      * Zielony — węzeł działa poprawnie, czerwony — wystąpił błąd.
      * @param node Węzeł, którego stan ma zostać zaktualizowany.
@@ -210,5 +182,33 @@ public class GraphPanel extends Pane {
                 }
             }
         });
+    }
+
+    /**
+     * Animuje wizualny przesył danych pomiędzy dwoma węzłami.
+     * Na ekranie pojawia się mała kula symbolizująca pakiet, poruszająca się wzdłuż połączenia między węzłami.
+     * @param from Węzeł źródłowy (nadawca).
+     * @param to Węzeł docelowy (odbiorca).
+     * @param durationMs Czas trwania animacji w milisekundach.
+     */
+    public void animateTransmission(Node from, Node to, long durationMs) {
+        Circle c1 = nodeCircles.get(from);
+        Circle c2 = nodeCircles.get(to);
+        if (c1 == null || c2 == null) return;
+
+        // Mała kula symbolizująca pakiet
+        Circle packet = new Circle(5, Color.LIMEGREEN);
+        Platform.runLater(() -> getChildren().add(packet));
+
+        Path path = new Path();
+        path.getElements().add(new MoveTo(c1.getCenterX(), c1.getCenterY()));
+        path.getElements().add(new LineTo(c2.getCenterX(), c2.getCenterY()));
+
+        // Czas animacji = durationMs (ms)
+        double seconds = Math.max(durationMs / 1000.0, 0.3); // minimum 0.3 sekundy dla widoczności
+        PathTransition transition = new PathTransition(Duration.seconds(seconds), path, packet);
+        transition.setCycleCount(1);
+        transition.setOnFinished(e -> Platform.runLater(() -> getChildren().remove(packet)));
+        Platform.runLater(transition::play);
     }
 }
