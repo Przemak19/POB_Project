@@ -26,7 +26,6 @@ public class Fault {
         this.active = false;
     }
 
-
     /**
      * Zwraca typ błędu przypisany do tej usterki.
      * @return Typ błędu jako {@link ErrorType}.
