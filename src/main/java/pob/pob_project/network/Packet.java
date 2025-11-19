@@ -60,19 +60,6 @@ public class Packet {
         return ack;
     }
 
-
-    /** @return Dane zawarte w pakiecie. */
-    public String getData() { return data; }
-
-    /** @return Identyfikator węzła nadawcy. */
-    public int getSourceId() { return sourceId; }
-
-    /** @return Identyfikator węzła odbiorcy. */
-    public int getDestinationId() { return destinationId; }
-
-    /** @return Czy pakiet jest aktualnie opóźniony. */
-    public boolean isDelayed() { return isDelayed; }
-
     /**
      * Ustawia, czy pakiet ma być opóźniony w transmisji.
      * @param isDelayed Wartość {@code true}, jeśli pakiet powinien być opóźniony.
@@ -90,6 +77,18 @@ public class Packet {
 
     /** Ustawia typ potwierdzenia ACK: {@code true} lub {@code false}. */
     public void setAckPositive(boolean ackPositive) { this.ackPositive = ackPositive; }
+
+    /** @return Dane zawarte w pakiecie. */
+    public String getData() { return data; }
+
+    /** @return Identyfikator węzła nadawcy. */
+    public int getSourceId() { return sourceId; }
+
+    /** @return Identyfikator węzła odbiorcy. */
+    public int getDestinationId() { return destinationId; }
+
+    /** @return Czy pakiet jest aktualnie opóźniony. */
+    public boolean isDelayed() { return isDelayed; }
 
     /**
      * Ustawia opóźnienie pakietu w milisekundach.
