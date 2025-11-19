@@ -8,7 +8,6 @@ import pob.pob_project.network.Node;
  * Klasa ta jest wykorzystywana przez kontroler symulacji do testowania zachowania sieci w warunkach błędów.
  */
 public class ErrorInjector {
-
     /**
      * Wstrzykuje wybrany typ błędu do podanego węzła.
      * @param node Węzeł, do którego ma zostać wprowadzony błąd.

@@ -23,7 +23,7 @@ public class GraphPanel extends Pane {
 
     /** Wysokość panelu graficznego w pikselach. */
     private final int HEIGHT = 400;
-    
+
     /** Szerokość panelu graficznego w pikselach. */
     private final int WIDTH = 700;
 
