@@ -138,21 +138,6 @@ public class CRCUtil {
     }
 
     /**
-     * Wyodrębnia CRC z ciągu bitów wiadomości + CRC.
-     * @param dataWithCrc Ciąg bitów wiadomości + CRC.
-     * @param polynomial Wielomian, przy pomocy którego dane są zabezpieczone.
-     * @return część CRC (reszta z dzielenia).
-     */
-    public String extractCRC(String dataWithCrc, String polynomial) {
-        if (dataWithCrc == null || polynomial == null || polynomial.isEmpty()) return "";
-
-        int crcLength = polynomial.length() - 1;
-        if (dataWithCrc.length() < crcLength) return "";
-
-        return dataWithCrc.substring(dataWithCrc.length() - crcLength);
-    }
-
-    /**
      * Zamienia ciąg bitów na String.
      * @param bits Ciąg bitów.
      * @return String z bitów.
@@ -171,4 +156,18 @@ public class CRCUtil {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Wyodrębnia CRC z ciągu bitów wiadomości + CRC.
+     * @param dataWithCrc Ciąg bitów wiadomości + CRC.
+     * @param polynomial Wielomian, przy pomocy którego dane są zabezpieczone.
+     * @return część CRC (reszta z dzielenia).
+     */
+    public String extractCRC(String dataWithCrc, String polynomial) {
+        if (dataWithCrc == null || polynomial == null || polynomial.isEmpty()) return "";
+
+        int crcLength = polynomial.length() - 1;
+        if (dataWithCrc.length() < crcLength) return "";
+
+        return dataWithCrc.substring(dataWithCrc.length() - crcLength);
+    }
 }
