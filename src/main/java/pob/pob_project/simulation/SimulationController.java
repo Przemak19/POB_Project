@@ -58,17 +58,6 @@ public class SimulationController {
     }
 
     /**
-     * Uruchamia symulację, aktywując wszystkie węzły w sieci oraz ustawiając domyślny wielomian CRC.
-     */
-    public void startSimulation() {
-        for (Node node : graph.getNodes()) {
-            node.start();
-        }
-        setCrcPolynomial("1010");
-        Logger.log("Symulacja uruchomiona.");
-    }
-
-    /**
      * Weryfikuje poprawność formatu wielomianu CRC.
      * @param polynomial Ciąg bitów reprezentujący wielomian CRC.
      * @return Wartość {@code true} Jeśli wielomian jest poprawny (ma długość 2–32 bity, zawiera tylko zera i jedynki oraz zaczyna się od '1').
@@ -82,6 +71,16 @@ public class SimulationController {
                 && polynomial.charAt(0) == '1';
     }
 
+    /**
+     * Uruchamia symulację, aktywując wszystkie węzły w sieci oraz ustawiając domyślny wielomian CRC.
+     */
+    public void startSimulation() {
+        for (Node node : graph.getNodes()) {
+            node.start();
+        }
+        setCrcPolynomial("1010");
+        Logger.log("Symulacja uruchomiona.");
+    }
 
     /**
      * Sprawdza, czy dwa węzły są bezpośrednimi sąsiadami w grafie.
