@@ -91,16 +91,6 @@ public class LogPanel extends VBox {
     }
 
     /**
-     * Wydobywa z logu fragment zawierający znacznik czasu w formacie: [HH:mm:ss].
-     * @param msg Pełny tekst logu.
-     * @return Tekst zawierający znacznik czasu lub pusty ciąg.
-     */
-    private static String extractTime(String msg) {
-        int end = msg.indexOf("]");
-        return (end > 0) ? msg.substring(0, end + 1) + " " : "";
-    }
-
-    /**
      * Wydobywa identyfikator pierwszego komputera (nadawcy) z logu.
      * @param msg Pełny tekst logu.
      * @return Fragment tekstu z identyfikatorem komputera lub pusty ciąg.
@@ -112,6 +102,16 @@ public class LogPanel extends VBox {
             return msg.substring(start, end + 1);
         }
         return "";
+    }
+
+    /**
+     * Wydobywa z logu fragment zawierający znacznik czasu w formacie: [HH:mm:ss].
+     * @param msg Pełny tekst logu.
+     * @return Tekst zawierający znacznik czasu lub pusty ciąg.
+     */
+    private static String extractTime(String msg) {
+        int end = msg.indexOf("]");
+        return (end > 0) ? msg.substring(0, end + 1) + " " : "";
     }
 
     /**
