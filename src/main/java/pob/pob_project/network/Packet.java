@@ -23,11 +23,11 @@ public class Packet {
     /** Czas opóźnienia pakietu w milisekundach. */
     private int delay;
 
-    /** Czy pakiet jest potwierdzeniem (ACK). */
-    private boolean isAck = false;
-
     /** Typ potwierdzenia: true – ACK pozytywny, false – żądanie retransmisji (NACK). */
     private boolean ackPositive = false;
+
+    /** Czy pakiet jest potwierdzeniem (ACK). */
+    private boolean isAck = false;
 
     /** Generator losowy, potencjalnie wykorzystywany do symulacji losowych zjawisk. */
     private static final Random random = new Random();
