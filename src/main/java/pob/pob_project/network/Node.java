@@ -30,11 +30,11 @@ public class Node implements Runnable {
     /** Lista sąsiadów (węzłów bezpośrednio połączonych z tym). */
     private final List<Node> neighbors = new ArrayList<>();
 
-    /** Aktualna usterka (jeśli występuje). */
-    private Fault currentFault;
-
     /** Wielomian używany do obliczania CRC. */
     private String polynomial;
+
+    /** Aktualna usterka (jeśli występuje). */
+    private Fault currentFault;
 
     /** Narzędzie do generowania i weryfikacji CRC. */
     private final CRCUtil crcUtil;
