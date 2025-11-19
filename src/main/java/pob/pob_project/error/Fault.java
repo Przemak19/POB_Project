@@ -20,17 +20,17 @@ public class Fault {
     }
 
     /**
+     * Zwraca typ błędu przypisany do tej usterki.
+     * @return Typ błędu jako {@link ErrorType}.
+     */
+    public ErrorType getType() { return type; }
+
+    /**
      * Dezaktywuje usterkę, przywracając normalne działanie węzła.
      */
     public void deactivate() {
         this.active = false;
     }
-
-    /**
-     * Zwraca typ błędu przypisany do tej usterki.
-     * @return Typ błędu jako {@link ErrorType}.
-     */
-    public ErrorType getType() { return type; }
 
     /**
      * Sprawdza, czy usterka jest aktualnie aktywna.
