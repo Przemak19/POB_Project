@@ -21,11 +21,11 @@ import java.util.Map;
  */
 public class GraphPanel extends Pane {
 
-    /** Szerokość panelu graficznego w pikselach. */
-    private final int WIDTH = 700;
-
     /** Wysokość panelu graficznego w pikselach. */
     private final int HEIGHT = 400;
+    
+    /** Szerokość panelu graficznego w pikselach. */
+    private final int WIDTH = 700;
 
     /** Kontroler zarządzający logiką i stanem symulacji. */
     private SimulationController controller;
