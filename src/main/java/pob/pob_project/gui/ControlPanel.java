@@ -40,7 +40,7 @@ public class ControlPanel extends VBox {
 
         setSpacing(5);
         setPadding(new Insets(5));
-        setStyle("-fx-background-color: #2b2b2b;");
+        setStyle("-fx-background-color: #363535ff;");
 
         Label title = new Label("Sterowanie symulacją");
         title.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
