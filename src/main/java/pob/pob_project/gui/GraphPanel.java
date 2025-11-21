@@ -25,7 +25,7 @@ public class GraphPanel extends Pane {
     private final int HEIGHT = 400;
 
     /** Szerokość panelu graficznego w pikselach. */
-    private final int WIDTH = 700;
+    private final int WIDTH = 720;
 
     /** Kontroler zarządzający logiką i stanem symulacji. */
     private SimulationController controller;
