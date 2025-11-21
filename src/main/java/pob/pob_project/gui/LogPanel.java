@@ -31,7 +31,7 @@ public class LogPanel extends VBox {
 
         logFlow = new TextFlow();
         logFlow.setPrefHeight(360);
-        logFlow.setLineSpacing(4);
+        logFlow.setLineSpacing(5);
         logFlow.setStyle("-fx-padding: 10;");
         logFlow.setStyle("-fx-font-size: 14px;");
 
