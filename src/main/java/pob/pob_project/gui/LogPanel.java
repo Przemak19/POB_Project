@@ -23,7 +23,7 @@ public class LogPanel extends VBox {
      * Inicjalizuje wygląd sekcji logowania oraz przewijalny obszar tekstu.
      */
     public LogPanel() {
-        setStyle("-fx-background-color: #111;");
+        setStyle("-fx-background-color: #131313ff;");
         setPrefHeight(400);
 
         Label title = new Label("Logi systemowe:");
