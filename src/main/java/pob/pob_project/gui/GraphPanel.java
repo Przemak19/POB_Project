@@ -21,11 +21,13 @@ import java.util.Map;
  */
 public class GraphPanel extends Pane {
 
+
     /** Wysokość panelu graficznego w pikselach. */
     private final int HEIGHT = 400;
 
     /** Szerokość panelu graficznego w pikselach. */
     private final int WIDTH = 720;
+
 
     /** Kontroler zarządzający logiką i stanem symulacji. */
     private SimulationController controller;
@@ -44,7 +46,6 @@ public class GraphPanel extends Pane {
 
     /** Mapa etykiet wyświetlających statystyki węzłów. */
     private Map<Node, Text> statsLabels = new HashMap<>();
-
     /**
      * Konstruktor klasy GraphPanel.
      * Inicjalizuje panel i rysuje graf w oparciu o dane z kontrolera symulacji.
@@ -56,10 +57,7 @@ public class GraphPanel extends Pane {
         drawGraph();
     }
 
-    /**
-     * Tworzy i rozmieszcza graficzne elementy reprezentujące węzły i połączenia grafu.
-     * Każdy węzeł ma etykietę, kolor, statystyki oraz reakcję na najechanie kursorem.
-     */
+
     private void drawGraph() {
         List<Node> nodes = controller.getGraph().getNodes();
         double centerX = (double) WIDTH / 1.5;
@@ -98,7 +96,6 @@ public class GraphPanel extends Pane {
             errorLabels.put(node, errorLabel);
             statsLabels.put(node, statsLabel);
 
-            //pokaż statystyki
             circle.setOnMouseEntered(e -> {
                 updateNodeStats(node);
                 statsLabel.setVisible(true);
@@ -108,7 +105,6 @@ public class GraphPanel extends Pane {
                 circle.setStroke(Color.YELLOW);
             });
 
-            //ukryj statystyki
             circle.setOnMouseExited(e -> {
                 statsLabel.setVisible(false);
                 statsBackground.setVisible(false);
