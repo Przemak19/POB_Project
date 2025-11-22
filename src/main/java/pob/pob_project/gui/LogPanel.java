@@ -43,17 +43,6 @@ public class LogPanel extends VBox {
         getChildren().addAll(title, scrollPane);
     }
 
-    /**
-     * Dodaje nowy wpis do logów systemowych z wyróżnieniem kolorów i składników wiadomości.
-     * Wpis jest dzielony na części:
-     * <ul>
-     *     <li>znacznik czasu (zielony),</li>
-     *     <li>identyfikatory komputerów (czerwony),</li>
-     *     <li>dane binarne (żółto-zielony),</li>
-     *     <li>pozostały tekst (beżowy).</li>
-     * </ul>
-     * @param message Pełna treść logu do wyświetlenia.
-     */
     public static void appendLog(String message) {
         Platform.runLater(() -> {
 
